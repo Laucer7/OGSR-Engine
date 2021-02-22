@@ -216,15 +216,10 @@ public:
 
 public:
 	//свойства артефактов
-	virtual void		UpdateArtefactsOnBelt();
-	virtual void		UpdateArtefactsOnBeltAmmo();
-
+	virtual void					UpdateArtefactsOnBelt();
 	virtual ActorRestoreParams		ActiveArtefactsOnBelt();
-	virtual ActorRestoreParams		ActiveArtefactsOnBeltAmmo();
 	virtual float					HitArtefactsOnBelt( float, ALife::EHitType, bool = false );
-	virtual float					HitArtefactsOnBeltAmmo(float, ALife::EHitType, bool = false);
-
-	virtual void		UpdateArtefactPanel();
+	virtual void					UpdateArtefactPanel();
 protected:
 	void ApplyArtefactEffects(ActorRestoreParams&, CArtefact*);
 	//звук тяжелого дыхания
