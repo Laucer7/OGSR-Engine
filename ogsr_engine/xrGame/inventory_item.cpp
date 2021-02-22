@@ -80,6 +80,7 @@ CInventoryItem::CInventoryItem()
 	SetSlot(NO_ACTIVE_SLOT);
 	m_flags.zero();
 	m_flags.set			(Fbelt,FALSE);
+	m_flags.set			(FbeltAmmo, FALSE);
 	m_flags.set			(Fruck,TRUE);
 	m_flags.set			(FRuckDefault,TRUE);
 	m_pCurrentInventory	= NULL;
@@ -101,6 +102,7 @@ CInventoryItem::CInventoryItem()
 	m_fRadiationRestoreSpeed = 0.f;
 
 	loaded_belt_index = (u8)(-1);
+	loaded_beltAmmo_index = (u8)(-1);
 	m_highlight_equipped = false;
 	m_always_ungroupable = false;
 }
@@ -179,6 +181,7 @@ void CInventoryItem::Load(LPCSTR section)
 		m_Description = CStringTable().translate( pSettings->r_string(section, "description") );
 
 	m_flags.set(Fbelt,			READ_IF_EXISTS(pSettings, r_bool, section, "belt",				FALSE));
+	m_flags.set(FbeltAmmo,		READ_IF_EXISTS(pSettings, r_bool, section, "beltAmmo",			FALSE));
 	m_flags.set(FRuckDefault,	READ_IF_EXISTS(pSettings, r_bool, section, "default_to_ruck",	TRUE));
 	m_flags.set(FCanTake,		READ_IF_EXISTS(pSettings, r_bool, section, "can_take",			TRUE));
 	m_flags.set(FCanTrade,		READ_IF_EXISTS(pSettings, r_bool, section, "can_trade",			TRUE));
@@ -450,6 +453,10 @@ void CInventoryItem::save(NET_Packet &packet)
           packet.w_u8( (u8)eItemPlaceBeltActor );
           packet.w_u8( (u8)m_pCurrentInventory->GetIndexOnBelt( this ) );
 	}
+	else if(m_eItemPlace == eItemPlaceBeltAmmo && smart_cast<CActor*>(object().H_Parent())) {
+			packet.w_u8( (u8)eItemPlaceBeltAmmoActor);
+			packet.w_u8( (u8)m_pCurrentInventory->GetIndexOnBeltAmmo(this));
+	}
 	else
           packet.w_u8( (u8)m_eItemPlace );
 	packet.w_float			(m_fCondition);
@@ -547,6 +554,15 @@ void CInventoryItem::load(IReader &packet)
 	    Msg( "! [%s]: move %s from belt, because belt = false", __FUNCTION__, object().cName().c_str() );
 	    m_eItemPlace = eItemPlaceRuck;
 	  }
+	}
+	else if ( m_eItemPlace == eItemPlaceBeltAmmoActor ) {
+		if ( BeltAmmo() )
+			SetLoadedBeltAmmoIndex(packet.r_u8());
+		else {
+			packet.r_u8();
+			Msg("! [%s]: move %s from beltAmmo, because beltAmmo = false", __FUNCTION__, object().cName().c_str());
+			m_eItemPlace = eItemPlaceRuck;
+		}
 	}
 	m_fCondition			= packet.r_float();
         if ( m_eItemPlace == eItemPlaceSlot )
@@ -1160,6 +1176,12 @@ void CInventoryItem::SetLoadedBeltIndex( u8 pos ) {
 }
 
 
+void CInventoryItem::SetLoadedBeltAmmoIndex( u8 pos ) {
+	loaded_beltAmmo_index = pos;
+	m_eItemPlace = eItemPlaceBeltAmmo;
+}
+
+
 void CInventoryItem::OnMoveToSlot() {
   if ( smart_cast<CActor*>( object().H_Parent() )/* && !smart_cast<CGrenade*>( this )*/) {
     if ( Core.Features.test( xrCore::Feature::equipped_untradable ) ) {
@@ -1189,6 +1211,22 @@ void CInventoryItem::OnMoveToBelt() {
       m_highlight_equipped = true;
     }
   }
+};
+
+
+void CInventoryItem::OnMoveToBeltAmmo() {
+	if ( smart_cast<CActor*>( object().H_Parent() ) ) {
+		if ( Core.Features.test( xrCore::Feature::equipped_untradable ) ) {
+			m_flags.set(FIAlwaysUntradable, TRUE);
+			m_flags.set(FIUngroupable, TRUE);
+			if ( Core.Features.test( xrCore::Feature::highlight_equipped ) )
+				m_highlight_equipped = true;
+		}
+		else if ( Core.Features.test( xrCore::Feature::highlight_equipped ) ) {
+			m_flags.set( FIUngroupable, TRUE );
+			m_highlight_equipped = true;
+		}
+	}
 };
 
 

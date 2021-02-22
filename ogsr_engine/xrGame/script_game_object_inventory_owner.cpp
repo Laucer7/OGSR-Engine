@@ -1014,6 +1014,24 @@ CScriptGameObject *CScriptGameObject::ItemOnBelt(u32 item_id) const
 	return			(result ? result->object().lua_game_object() : 0);
 }
 
+CScriptGameObject* CScriptGameObject::ItemOnBeltAmmo(u32 item_id) const
+{
+	CInventoryOwner* inventory_owner = smart_cast<CInventoryOwner*>(&object());
+	if (!inventory_owner) {
+		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError, "CInventoryOwner : cannot access class member item_on_beltAmmo!");
+		return		(0);
+	}
+
+	TIItemContainer* beltAmmo = &(inventory_owner->inventory().m_beltAmmo);
+	if (beltAmmo->size() < item_id) {
+		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError, "item_on_beltAmmo: item id outside beltAmmo!");
+		return		(0);
+	}
+
+	CInventoryItem* result = beltAmmo->at(item_id);
+	return			(result ? result->object().lua_game_object() : 0);
+}
+
 CScriptGameObject *CScriptGameObject::ItemInRuck(u32 item_id) const
 {
 	CInventoryOwner	*inventory_owner = smart_cast<CInventoryOwner*>(&object());
@@ -1047,6 +1065,23 @@ bool CScriptGameObject::IsOnBelt(CScriptGameObject *obj) const
 	}
 
 	return inventory_owner->inventory().InBelt(inventory_item);
+}
+
+bool CScriptGameObject::IsOnBeltAmmo(CScriptGameObject* obj) const
+{
+	CInventoryItem* inventory_item = smart_cast<CInventoryItem*>(&(obj->object()));
+	if (!inventory_item) {
+		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError, "CInventoryItem : cannot access class member is_on_beltAmmo!");
+		return		(0);
+	}
+
+	CInventoryOwner* inventory_owner = smart_cast<CInventoryOwner*>(&object());
+	if (!inventory_owner) {
+		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError, "CInventoryOwner : cannot access class member is_on_beltAmmo!");
+		return		(0);
+	}
+
+	return inventory_owner->inventory().InBeltAmmo(inventory_item);
 }
 
 bool CScriptGameObject::IsInRuck(CScriptGameObject *obj) const
@@ -1134,6 +1169,23 @@ void CScriptGameObject::MoveToBelt(CScriptGameObject *obj)
 	inventory_owner->inventory().Belt(inventory_item);
 }
 
+void CScriptGameObject::MoveToBeltAmmo(CScriptGameObject* obj)
+{
+	CInventoryItem* inventory_item = smart_cast<CInventoryItem*>(&(obj->object()));
+	if (!inventory_item) {
+		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError, "CInventoryItem : cannot access class member move_to_beltAmmo!");
+		return;
+	}
+
+	CInventoryOwner* inventory_owner = smart_cast<CInventoryOwner*>(&object());
+	if (!inventory_owner) {
+		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError, "CInventoryOwner : cannot access class member move_to_beltAmmo!");
+		return;
+	}
+
+	inventory_owner->inventory().BeltAmmo(inventory_item);
+}
+
 u32 CScriptGameObject::BeltSize() const
 {
 	CInventoryOwner	*inventory_owner = smart_cast<CInventoryOwner*>(&object());
@@ -1143,6 +1195,17 @@ u32 CScriptGameObject::BeltSize() const
 	}
 
 	return inventory_owner->inventory().m_belt.size();
+}
+
+u32 CScriptGameObject::BeltAmmoSize() const
+{
+	CInventoryOwner* inventory_owner = smart_cast<CInventoryOwner*>(&object());
+	if (!inventory_owner) {
+		ai().script_engine().script_log(ScriptStorage::eLuaMessageTypeError, "CInventoryOwner : cannot access class member move_to_beltAmmo!");
+		return (0);
+	}
+
+	return inventory_owner->inventory().m_beltAmmo.size();
 }
 
 u32 CScriptGameObject::RuckSize() const
@@ -1196,6 +1259,15 @@ void CScriptGameObject::IterateBelt( const luabind::functor<void>& functor, cons
   for ( const auto* it : inventory_owner->inventory().m_belt )
     if ( !it->object().getDestroy() )
       functor( object, it->object().lua_game_object() );
+}
+
+
+void CScriptGameObject::IterateBeltAmmo(const luabind::functor<void>& functor, const luabind::object& object) {
+	auto inventory_owner = smart_cast<CInventoryOwner*>(&this->object());
+	ASSERT_FMT(inventory_owner, "[%s]: %s not an CInventoryOwner", __FUNCTION__, this->object().Name());
+	for (const auto* it : inventory_owner->inventory().m_beltAmmo)
+		if (!it->object().getDestroy())
+			functor(object, it->object().lua_game_object());
 }
 
 

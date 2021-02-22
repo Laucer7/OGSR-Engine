@@ -65,6 +65,7 @@ public:
 		FIAlwaysUntradable = (1 << 12),
 		FIUngroupable = (1 << 13),
 		FIHiddenForInventory = (1 << 14),
+		FbeltAmmo = (1 << 15)
 	};
 	const u32 ClrEquipped   = READ_IF_EXISTS(pSettings, r_color, "dragdrop", "color_equipped", color_argb(255, 255, 225, 0));
 	const u32 ClrUntradable = READ_IF_EXISTS(pSettings, r_color, "dragdrop", "color_untradable", color_argb(255, 124, 0, 0));
@@ -152,6 +153,7 @@ public:
 
 	virtual void				OnMoveToSlot		();
 	virtual void				OnMoveToBelt		();
+	virtual void				OnMoveToBeltAmmo	();
 	virtual void				OnMoveToRuck		();
 	virtual void				OnDrop() {};
 
@@ -184,6 +186,8 @@ public:
 
 			bool				Belt				()							{return !!m_flags.test(Fbelt);}
 			void				Belt				(bool on_belt)				{m_flags.set(Fbelt,on_belt);}
+			bool				BeltAmmo			()							{ return !!m_flags.test(FbeltAmmo); }
+			void				BeltAmmo			(bool on_beltAmmo)			{ m_flags.set(FbeltAmmo, on_beltAmmo); }
 			bool				Ruck				()							{return !!m_flags.test(Fruck);}
 			void				Ruck				(bool on_ruck)				{m_flags.set(Fruck,on_ruck);}
 			bool				RuckDefault			()							{return !!m_flags.test(FRuckDefault);}
@@ -280,10 +284,13 @@ public:
 
  private:
         u8   loaded_belt_index;
-        void SetLoadedBeltIndex( u8 );
+		u8   loaded_beltAmmo_index;
+		void SetLoadedBeltIndex( u8 );
+        void SetLoadedBeltAmmoIndex( u8 );
 
  public:
         u8   GetLoadedBeltIndex() { return loaded_belt_index; };
+		u8   GetLoadedBeltAmmoIndex() { return loaded_beltAmmo_index; };
 	bool m_highlight_equipped;
 	bool m_always_ungroupable;
 };

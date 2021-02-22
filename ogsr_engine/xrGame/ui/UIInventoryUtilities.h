@@ -30,6 +30,7 @@ namespace InventoryUtilities
 bool GreaterRoomInRuck	(PIItem item1, PIItem item2);
 //для проверки свободного места
 bool FreeRoom_inBelt	(TIItemContainer& item_list, PIItem item, int width, int height);
+bool FreeRoom_inBeltAmmo(TIItemContainer& item_list, PIItem item, int width, int height);
 
 //получить shader на иконки инвенторя
 ui_shader& GetEquipmentIconsShader(size_t icon_group = 0);

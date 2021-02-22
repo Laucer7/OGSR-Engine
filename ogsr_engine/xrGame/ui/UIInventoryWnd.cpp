@@ -39,7 +39,7 @@ using namespace InventoryUtilities;
 CUIInventoryWnd*	g_pInvWnd = NULL;
 
 CUIInventoryWnd::CUIInventoryWnd() : 
-	m_pUIBagList(nullptr), m_pUIBeltList(nullptr), m_pUIPistolList(nullptr), m_pUIAutomaticList(nullptr),
+	m_pUIBagList(nullptr), m_pUIBeltList(nullptr), m_pUIBeltAmmoList(nullptr), m_pUIPistolList(nullptr), m_pUIAutomaticList(nullptr),
 	m_pUIKnifeList(nullptr), m_pUIHelmetList(nullptr), m_pUIBIODetList(nullptr), m_pUINightVisionList(nullptr),
 	m_pUIDetectorList(nullptr), m_pUITorchList(nullptr), m_pUIBinocularList(nullptr), m_pUIOutfitList(nullptr)
 {
@@ -66,6 +66,9 @@ void CUIInventoryWnd::Init()
 
 	AttachChild							(&UIBeltSlots);
 	xml_init.InitStatic					(uiXml, "belt_slots", 0, &UIBeltSlots);
+
+	AttachChild							(&UIBeltAmmoSlots);
+	xml_init.InitStatic					(uiXml, "beltAmmo_slots", 0, &UIBeltAmmoSlots);
 
 	AttachChild							(&UIBack);
 	xml_init.InitStatic					(uiXml, "back", 0, &UIBack);
@@ -119,6 +122,10 @@ void CUIInventoryWnd::Init()
 	m_pUIBeltList						= xr_new<CUIDragDropListEx>(); AttachChild(m_pUIBeltList); m_pUIBeltList->SetAutoDelete(true);
 	xml_init.InitDragDropListEx			(uiXml, "dragdrop_belt", 0, m_pUIBeltList);
 	BindDragDropListEnents				(m_pUIBeltList);
+
+	m_pUIBeltAmmoList = xr_new<CUIDragDropListEx>(); AttachChild(m_pUIBeltAmmoList); m_pUIBeltAmmoList->SetAutoDelete(true);
+	xml_init.InitDragDropListEx(uiXml, "dragdrop_beltAmmo", 0, m_pUIBeltAmmoList);
+	BindDragDropListEnents(m_pUIBeltAmmoList);
 
 	m_pUIOutfitList						= xr_new<CUIOutfitDragDropList>(); AttachChild(m_pUIOutfitList); m_pUIOutfitList->SetAutoDelete(true);
 	xml_init.InitDragDropListEx			(uiXml, "dragdrop_outfit", 0, m_pUIOutfitList);
@@ -219,6 +226,7 @@ EListType CUIInventoryWnd::GetType(CUIDragDropListEx* l)
 {
 	if(l==m_pUIBagList)			return iwBag;
 	if(l==m_pUIBeltList)		return iwBelt;
+	if(l==m_pUIBeltAmmoList)	return iwBeltAmmo;
 
         for ( u8 i = 0; i < SLOTS_TOTAL; i++ )
           if ( m_slots_array[ i ] == l )
@@ -357,6 +365,7 @@ void CUIInventoryWnd::Hide()
 void CUIInventoryWnd::HideSlotsHighlight()
 {
 	m_pUIBeltList->enable_highlight(false);
+	m_pUIBeltAmmoList->enable_highlight(false);
 	for (const auto& DdList : m_slots_array)
 		if (DdList)
 			DdList->enable_highlight(false);
@@ -366,6 +375,8 @@ void CUIInventoryWnd::ShowSlotsHighlight(PIItem InvItem)
 {
 	if (InvItem->m_flags.test(CInventoryItem::Fbelt) && !Actor()->inventory().InBelt(InvItem))
 		m_pUIBeltList->enable_highlight(true);
+	if (InvItem->m_flags.test(CInventoryItem::FbeltAmmo) && !Actor()->inventory().InBeltAmmo(InvItem))
+		m_pUIBeltAmmoList->enable_highlight(true);
 
 	for (const u8 slot : InvItem->GetSlots())
 		if (auto DdList = m_slots_array[slot]; DdList && (!Actor()->inventory().InSlot(InvItem) || InvItem->GetSlot() != slot))
@@ -442,6 +453,16 @@ void	CUIInventoryWnd::SendEvent_Item2Belt			(PIItem	pItem)
 {
 	NET_Packet						P;
 	pItem->object().u_EventGen		(P, GEG_PLAYER_ITEM2BELT, pItem->object().H_Parent()->ID());
+	P.w_u16							(pItem->object().ID());
+	pItem->object().u_EventSend		(P);
+	g_pInvWnd->PlaySnd				(eInvItemToBelt);
+	m_b_need_update_stats = true;
+};
+
+void	CUIInventoryWnd::SendEvent_Item2BeltAmmo(PIItem	pItem)
+{
+	NET_Packet						P;
+	pItem->object().u_EventGen		(P, GEG_PLAYER_ITEM2BELTAMMO, pItem->object().H_Parent()->ID());
 	P.w_u16							(pItem->object().ID());
 	pItem->object().u_EventSend		(P);
 	g_pInvWnd->PlaySnd				(eInvItemToBelt);
@@ -537,9 +558,12 @@ void CUIInventoryWnd::UpdateOutfit()
 		return;
 	}
 
+
 	auto& inv = Actor()->inventory();
 	const u32 new_slots_count = inv.BeltSlotsCount();
+	const u32 new_slots_count2 = inv.BeltAmmoSlotsCount();
 	m_pUIBeltList->SetCellsAvailable(new_slots_count);
+	m_pUIBeltAmmoList->SetCellsAvailable(new_slots_count2);
 
 	auto& l_blist = inv.m_belt;
 	bool modified{};
@@ -549,6 +573,18 @@ void CUIInventoryWnd::UpdateOutfit()
 	}
 
 	if (modified) {
+		extern void update_inventory_window(); //некрасиво, зато просто
+		update_inventory_window();
+	}
+
+	auto& l_blist2 = inv.m_beltAmmo;
+	bool modified2{};
+	while (l_blist2.size() > new_slots_count2) {
+		inv.Ruck(l_blist2.back());
+		modified2 = true;
+	}
+
+	if (modified2) {
 		extern void update_inventory_window(); //некрасиво, зато просто
 		update_inventory_window();
 	}

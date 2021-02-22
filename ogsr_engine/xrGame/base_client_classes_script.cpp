@@ -130,6 +130,7 @@ void CObjectScript::script_register		(lua_State *L)
 				value("FCanTake"				,				int(CInventoryItem::EIIFlags::FCanTake)),
 				value("FCanTrade"				,				int(CInventoryItem::EIIFlags::FCanTrade)),
 				value("Fbelt"					,				int(CInventoryItem::EIIFlags::Fbelt)),
+				value("FbeltAmmo"					,				int(CInventoryItem::EIIFlags::FbeltAmmo)),
 				value("Fruck"					,				int(CInventoryItem::EIIFlags::Fruck)),
 				value("FRuckDefault"			,				int(CInventoryItem::EIIFlags::FRuckDefault)),
 				value("FUsingCondition"			,				int(CInventoryItem::EIIFlags::FUsingCondition)),

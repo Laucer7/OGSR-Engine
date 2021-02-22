@@ -58,6 +58,7 @@ protected:
 								eInvSndClose,
 								eInvItemToSlot,
 								eInvItemToBelt,
+								eInvItemToBeltAmmo,
 								eInvItemToRuck,
 								eInvProperties,
 								eInvDropItem,
@@ -70,6 +71,7 @@ protected:
 	void						PlaySnd					(eInventorySndAction a);
 
 	CUIStatic					UIBeltSlots;
+	CUIStatic					UIBeltAmmoSlots;
 	CUIStatic					UIBack;
 	CUIStatic*					UIRankFrame;
 	CUIStatic*					UIRank;
@@ -89,6 +91,7 @@ protected:
 		
 	CUIDragDropListEx*			m_pUIBagList;
 	CUIDragDropListEx*			m_pUIBeltList;
+	CUIDragDropListEx*			m_pUIBeltAmmoList;
 
 	CUIDragDropListEx*			m_pUIPistolList;
 	CUIDragDropListEx*			m_pUIAutomaticList;
@@ -140,6 +143,7 @@ protected:
 	//----------------------	-----------------------------------------------
 	void						SendEvent_Item2Slot			(PIItem	pItem);
 	void						SendEvent_Item2Belt			(PIItem	pItem);
+	void						SendEvent_Item2BeltAmmo		(PIItem	pItem);
 	void						SendEvent_Item2Ruck			(PIItem	pItem);
 	void						SendEvent_Item_Drop			(PIItem	pItem);
 	void						SendEvent_Item_Eat			(PIItem	pItem);
@@ -157,6 +161,7 @@ protected:
 	bool						ToSlot						(CUICellItem* itm, bool force_place);
 	bool						ToBag						(CUICellItem* itm, bool b_use_cursor_pos);
 	bool						ToBelt						(CUICellItem* itm, bool b_use_cursor_pos);
+	bool						ToBeltAmmo					(CUICellItem* itm, bool b_use_cursor_pos);
 
 
 	void						AttachAddon					(PIItem item_to_upgrade);
@@ -169,6 +174,7 @@ protected:
 	u32							m_iCurrentActiveSlot;
 private:
 	bool dont_update_belt_flag{};
+	bool dont_update_beltAmmo_flag{};
 public:
 	PIItem						CurrentIItem();
 	void UpdateWeight();

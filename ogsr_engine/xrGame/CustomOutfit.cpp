@@ -93,6 +93,7 @@ void CCustomOutfit::Load(LPCSTR section)
 	m_fThirstRestoreSpeed    = READ_IF_EXISTS( pSettings, r_float, section, "thirst_restore_speed", 0.f );
 
 	m_artefact_count = READ_IF_EXISTS(pSettings, r_u32, section, "artefact_count", pSettings->r_u32("inventory", "max_belt"));
+	m_ammo_count	 = READ_IF_EXISTS( pSettings, r_u32, section, "ammo_count", pSettings->r_u32("inventory", "max_beltAmmo") );
 }
 
 void CCustomOutfit::Hit(float hit_power, ALife::EHitType hit_type)

@@ -159,6 +159,89 @@ bool InventoryUtilities::FreeRoom_inBelt	(TIItemContainer& item_list, PIItem _it
 	return true;
 }
 
+
+bool InventoryUtilities::FreeRoom_inBeltAmmo(TIItemContainer& item_list, PIItem _item, int width, int height)
+{
+	bool* ruck_room = (bool*)alloca(width * height);
+
+	int		i, j, k, m;
+	int		place_row = 0, place_col = 0;
+	bool	found_place;
+	bool	can_place;
+
+
+	for (i = 0; i < height; ++i)
+		for (j = 0; j < width; ++j)
+			ruck_room[i * width + j] = false;
+
+	item_list.push_back(_item);
+	std::stable_sort(
+		item_list.begin(), item_list.end(), [](const auto& a, const auto& b) {
+			if (a->GetGridWidth() > b->GetGridWidth()) return true;
+			if (a->GetGridWidth() == b->GetGridWidth())
+				return a->GetGridHeight() > b->GetGridHeight();
+			return false;
+		}
+	);
+
+	found_place = true;
+
+	for (xr_vector<PIItem>::iterator it = item_list.begin(); (item_list.end() != it) && found_place; ++it)
+	{
+		PIItem pItem = *it;
+		int iWidth = pItem->GetGridWidth();
+		int iHeight = pItem->GetGridHeight();
+		//проверить можно ли разместить элемент,
+		//проверяем последовательно каждую клеточку
+		found_place = false;
+
+		for (i = 0; (i < height - iHeight + 1) && !found_place; ++i)
+		{
+			for (j = 0; (j < width - iWidth + 1) && !found_place; ++j)
+			{
+				can_place = true;
+
+				for (k = 0; (k < iHeight) && can_place; ++k)
+				{
+					for (m = 0; (m < iHeight) && can_place; ++m)
+					{
+						if (ruck_room[(i + k) * width + (j + m)])
+							can_place = false;
+					}
+				}
+
+				if (can_place)
+				{
+					found_place = true;
+					place_row = i;
+					place_col = j;
+				}
+
+			}
+		}
+
+		//разместить элемент на найденном месте
+		if (found_place)
+		{
+			for (k = 0; k < iHeight; ++k)
+			{
+				for (m = 0; m < iWidth; ++m)
+				{
+					ruck_room[(place_row + k) * width + place_col + m] = true;
+				}
+			}
+		}
+	}
+
+	// remove
+	item_list.erase(std::remove(item_list.begin(), item_list.end(), _item), item_list.end());
+
+	//для какого-то элемента места не нашлось
+	if (!found_place) return false;
+
+	return true;
+}
+
 ui_shader& InventoryUtilities::GetEquipmentIconsShader(size_t icon_group)
 {	
 	if (auto it = g_EquipmentIconsShaders.find(icon_group); it == g_EquipmentIconsShaders.end())

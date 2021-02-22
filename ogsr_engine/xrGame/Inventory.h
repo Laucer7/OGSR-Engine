@@ -49,15 +49,18 @@ public:
 	
 	bool					Slot				(PIItem pIItem, bool bNotActivate = false);	
 	bool					Belt				(PIItem pIItem);
+	bool					BeltAmmo			(PIItem pIItem);
 	bool					Ruck				(PIItem pIItem);
 
 	bool 					InSlot				(PIItem pIItem) const;
 	bool 					InBelt				(PIItem pIItem) const;
+	bool 					InBeltAmmo				(PIItem pIItem) const;
 	bool 					InRuck				(PIItem pIItem) const;
 
 	bool 					CanPutInSlot		(PIItem pIItem) const;
 	bool 					CanPutInSlot		(PIItem pIItem, u8 slot) const;
 	bool 					CanPutInBelt		(PIItem pIItem);
+	bool 					CanPutInBeltAmmo    (PIItem pIItem);
 	bool 					CanPutInRuck		(PIItem pIItem) const;
 
 	bool					CanTakeItem			(CInventoryItem *inventory_item) const;
@@ -87,7 +90,9 @@ public:
 	PIItem GetAmmoMaxCurr ( const char*, bool ) const;
 	PIItem GetAmmoMinCurr ( const char*, bool ) const;
 	int    GetIndexOnBelt ( PIItem ) const;
+	int    GetIndexOnBeltAmmo (PIItem) const;
 	void   RestoreBeltOrder();
+	void   RestoreBeltAmmoOrder();
 
 	//search both (ruck and belt)
 	PIItem					item				(CLASS_ID cls_id) const;
@@ -117,10 +122,12 @@ public:
 	void 					SetSlotsUseful		(bool slots_useful) {m_bSlotsUseful = slots_useful;}
 	bool 					IsBeltUseful		() const			{return m_bBeltUseful;}
 	void 					SetBeltUseful		(bool belt_useful)	{m_bBeltUseful = belt_useful;}
+	bool 					IsBeltAmmoUseful	() const			{return m_bBeltAmmoUseful;}
+	void 					SetBeltAmmoUseful	(bool beltAmmo_useful) { m_bBeltAmmoUseful = beltAmmo_useful; }
 
 	void SetSlotsBlocked( u16 mask, bool bBlock, bool now = false );
 	TIItemContainer			m_all;
-	TIItemContainer			m_ruck, m_belt;
+	TIItemContainer			m_ruck, m_belt, m_beltAmmo;
 	TISlotArr				m_slots;
 
 	//возвращает все кроме PDA в слоте и болта
@@ -132,6 +139,7 @@ public:
 	void				SetMaxWeight				(float weight)			{m_fMaxWeight = weight;}
 
 	u32					BeltSlotsCount					() const;
+	u32					BeltAmmoSlotsCount() const;
 
 	inline	CInventoryOwner*GetOwner				() const				{ return m_pOwner; }
 	
@@ -166,6 +174,8 @@ protected:
 
 	//флаг, показывающий наличие пояса в инвенторе
 	bool				m_bBeltUseful;
+	//флаг, показывающий наличие пояса для патронов в инвенторе
+	bool				m_bBeltAmmoUseful;
 	//флаг, допускающий использование слотов
 	bool				m_bSlotsUseful;
 
@@ -175,6 +185,9 @@ protected:
 	// Максимальное кол-во объектов
 	//на поясе
 	u32					m_iMaxBelt;	
+	// Максимальное кол-во объектов
+	//на поясе для паронов
+	u32					m_iMaxBeltAmmo;
 	// Максимальное расстояние на котором можно подобрать объект
 	float				 m_fTakeDist;
 

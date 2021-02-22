@@ -79,6 +79,12 @@ void CUIInventoryWnd::ActivatePropertiesBox()
 		b_show = true;
 	}
 
+	if (CurrentIItem()->BeltAmmo() && m_pInv->CanPutInBeltAmmo(CurrentIItem()))
+	{
+		UIPropertiesBox.AddItem("st_move_on_belt", NULL, INVENTORY_TO_BELTAMMO_ACTION);
+		b_show = true;
+	}
+
 	if(CurrentIItem()->Ruck() && m_pInv->CanPutInRuck(CurrentIItem()) && (CurrentIItem()->GetSlot() == NO_ACTIVE_SLOT || !m_pInv->m_slots[CurrentIItem()->GetSlot()].m_bPersistent) )
 	{
 		if(!pOutfit)
@@ -240,6 +246,9 @@ void CUIInventoryWnd::ProcessPropertiesBoxClicked	()
 
 		case INVENTORY_TO_BELT_ACTION:	
 			ToBelt(CurrentItem(),false);
+			break;
+		case INVENTORY_TO_BELTAMMO_ACTION:
+			ToBeltAmmo(CurrentItem(), false);
 			break;
 		case INVENTORY_TO_BAG_ACTION:	
 			ToBag(CurrentItem(),false);

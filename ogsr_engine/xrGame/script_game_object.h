@@ -308,6 +308,7 @@ public:
 
 			void				IterateInventory( const luabind::functor<void>& functor, const luabind::object& object );
 			void				IterateBelt     ( const luabind::functor<void>& functor, const luabind::object& object );
+			void				IterateBeltAmmo ( const luabind::functor<void>& functor, const luabind::object& object );
 			void				IterateRuck     ( const luabind::functor<void>& functor, const luabind::object& object );
 			void				MarkItemDropped		(CScriptGameObject *item);
 			bool				MarkedDropped		(CScriptGameObject *item);
@@ -633,14 +634,18 @@ public:
 			// KD
 			// functions for CInventoryOwner class
 			CScriptGameObject	*ItemOnBelt(u32 item_id) const;
+			CScriptGameObject   *ItemOnBeltAmmo(u32 item_id) const;
 			CScriptGameObject	*ItemInRuck(u32 item_id) const;
 			bool				IsOnBelt(CScriptGameObject *object) const;
+			bool				IsOnBeltAmmo(CScriptGameObject *object) const;
 			bool				IsInRuck(CScriptGameObject *object) const;
 			bool				IsInSlot(CScriptGameObject *object) const;
 			void				MoveToSlot(CScriptGameObject *object, bool bNotActivate = true);
 			void				MoveToBelt(CScriptGameObject *object);
+			void				MoveToBeltAmmo(CScriptGameObject *object);
 			void				MoveToRuck(CScriptGameObject *object);
 			u32					BeltSize() const;
+			u32					BeltAmmoSize() const;
 			u32					RuckSize() const;
 			void				InvalidateInventory();
 

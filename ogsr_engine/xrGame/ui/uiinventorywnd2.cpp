@@ -154,7 +154,11 @@ void CUIInventoryWnd::InitInventory()
 		CUICellItem* itm			= create_cell_item(*it);
 		m_pUIBeltList->SetItem		(itm);
 	}
-
+	for (it = m_pInv->m_beltAmmo.begin(), it_e = m_pInv->m_beltAmmo.end(); it != it_e; ++it)
+	{
+		CUICellItem* itm = create_cell_item(*it);
+		m_pUIBeltAmmoList->SetItem(itm);
+	}
 	ruck_list		= m_pInv->m_ruck;
 	std::sort		(ruck_list.begin(),ruck_list.end(),InventoryUtilities::GreaterRoomInRuck);
 
@@ -266,6 +270,7 @@ bool CUIInventoryWnd::ToSlot(CUICellItem* itm, bool force_place)
 		VERIFY(slot_cell && ((PIItem)slot_cell->m_pData) == GetInventory()->m_slots[_slot].m_pIItem);
 
 		dont_update_belt_flag = _slot == OUTFIT_SLOT;
+		dont_update_beltAmmo_flag = _slot == OUTFIT_SLOT;
 
 #ifdef DEBUG
 		bool result =
@@ -352,6 +357,45 @@ bool CUIInventoryWnd::ToBelt(CUICellItem* itm, bool b_use_cursor_pos)
 	return									false;
 }
 
+bool CUIInventoryWnd::ToBeltAmmo(CUICellItem* itm, bool b_use_cursor_pos)
+{
+	PIItem	iitem = (PIItem)itm->m_pData;
+
+	if (GetInventory()->CanPutInBeltAmmo(iitem))
+	{
+		CUIDragDropListEx* old_owner = itm->OwnerList();
+		CUIDragDropListEx* new_owner = NULL;
+		if (b_use_cursor_pos) {
+			new_owner = CUIDragDropListEx::m_drag_item->BackList();
+			VERIFY(new_owner == m_pUIBeltAmmoList);
+		}
+		else
+			new_owner = m_pUIBeltAmmoList;
+#ifdef DEBUG
+		bool result =
+#endif
+			GetInventory()->BeltAmmo(iitem);
+		VERIFY(result);
+		CUICellItem* i = old_owner->RemoveItem(itm, (old_owner == new_owner));
+
+		//.	UIBeltList.RearrangeItems();
+		if (b_use_cursor_pos)
+			new_owner->SetItem(i, old_owner->GetDragItemPosition());
+		else
+			new_owner->SetItem(i);
+
+		SendEvent_Item2BeltAmmo(iitem);
+
+		/************************************************** added by Ray Twitty (aka Shadows) START **************************************************/
+		// обновляем статик веса в инвентаре
+		UpdateWeight();
+		/*************************************************** added by Ray Twitty (aka Shadows) END ***************************************************/
+
+		return								true;
+	}
+	return									false;
+}
+
 void CUIInventoryWnd::AddItemToBag(PIItem pItem)
 {
 	CUICellItem* itm						= create_cell_item(pItem);
@@ -367,7 +411,7 @@ bool CUIInventoryWnd::OnItemSelected(CUICellItem* itm)
 {
 	SetCurrentItem(itm);
 
-	itm->ColorizeItems( { m_pUIBagList, m_pUIBeltList, m_pUIPistolList, m_pUIAutomaticList, m_pUIKnifeList, m_pUIHelmetList, m_pUIBIODetList, m_pUINightVisionList, m_pUIDetectorList, m_pUITorchList, m_pUIBinocularList, m_pUIOutfitList } );
+	itm->ColorizeItems( { m_pUIBagList, m_pUIBeltList, m_pUIBeltAmmoList, m_pUIPistolList, m_pUIAutomaticList, m_pUIKnifeList, m_pUIHelmetList, m_pUIBIODetList, m_pUINightVisionList, m_pUIDetectorList, m_pUITorchList, m_pUIBinocularList, m_pUIOutfitList } );
 	return false;
 }
 
@@ -431,6 +475,9 @@ bool CUIInventoryWnd::OnItemDrop(CUICellItem* itm)
 	case iwBelt: {
 		ToBelt(itm, true);
 	}break;
+	case iwBeltAmmo: {
+		ToBeltAmmo(itm, true);
+	}break;
 	};
 
 	DropItem(CurrentIItem(), new_owner);
@@ -467,10 +514,14 @@ bool CUIInventoryWnd::OnItemDbClick(CUICellItem* itm)
           __item->SetSlot( slots.size() ? slots[ 0 ]: NO_ACTIVE_SLOT );
           if ( !ToSlot( itm, false ) )
             if ( !ToBelt( itm, false ) )
-              ToSlot( itm, true );
+				if (!ToBeltAmmo(itm, false))
+					 ToSlot( itm, true );
 	}break;
 
 	case iwBelt: {
+		ToBag(itm, false);
+	}break;
+	case iwBeltAmmo: {
 		ToBag(itm, false);
 	}break;
 	};
@@ -496,6 +547,7 @@ void CUIInventoryWnd::ClearAllLists()
 {
 	m_pUIBagList->ClearAll					(true);
 	m_pUIBeltList->ClearAll					(true);
+	m_pUIBeltAmmoList->ClearAll(true);
 	m_pUIOutfitList->ClearAll				(true);
 	m_pUIPistolList->ClearAll				(true);
 	if (Core.Features.test(xrCore::Feature::ogse_new_slots))

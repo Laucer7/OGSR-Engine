@@ -12,7 +12,8 @@ class CUIDragItem;
 enum EListType{
 		iwSlot,
 		iwBag,
-		iwBelt
+		iwBelt,
+		iwBeltAmmo
 };
 
 struct CUICell {

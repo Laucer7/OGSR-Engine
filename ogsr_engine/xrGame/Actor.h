@@ -190,6 +190,7 @@ public:
 	
 	virtual void OnItemRuck		(CInventoryItem *inventory_item, EItemPlace previous_place);
 	virtual void OnItemBelt		(CInventoryItem *inventory_item, EItemPlace previous_place);
+	virtual void OnItemBeltAmmo (CInventoryItem* inventory_item, EItemPlace previous_place);
 	virtual void OnItemSlot		(CInventoryItem *inventory_item, EItemPlace previous_place);
 
 	virtual void OnItemDrop		(CInventoryItem *inventory_item);
@@ -216,9 +217,12 @@ public:
 public:
 	//свойства артефактов
 	virtual void		UpdateArtefactsOnBelt();
+	virtual void		UpdateArtefactsOnBeltAmmo();
 
 	virtual ActorRestoreParams		ActiveArtefactsOnBelt();
+	virtual ActorRestoreParams		ActiveArtefactsOnBeltAmmo();
 	virtual float					HitArtefactsOnBelt( float, ALife::EHitType, bool = false );
+	virtual float					HitArtefactsOnBeltAmmo(float, ALife::EHitType, bool = false);
 
 	virtual void		UpdateArtefactPanel();
 protected:

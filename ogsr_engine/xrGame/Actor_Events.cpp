@@ -134,6 +134,7 @@ void CActor::OnEvent		(NET_Packet& P, u16 type)
 		break;
 	case GEG_PLAYER_ITEM2SLOT:
 	case GEG_PLAYER_ITEM2BELT:
+	case GEG_PLAYER_ITEM2BELTAMMO:
 	case GEG_PLAYER_ITEM2RUCK:
 	case GEG_PLAYER_ITEM_EAT:
 	case GEG_PLAYER_ACTIVATEARTEFACT:
@@ -155,6 +156,9 @@ void CActor::OnEvent		(NET_Packet& P, u16 type)
 				break;
 			case GEG_PLAYER_ITEM2BELT:	 
 				inventory().Belt(smart_cast<CInventoryItem*>(O)); 
+				break;
+			case GEG_PLAYER_ITEM2BELTAMMO:
+				inventory().BeltAmmo(smart_cast<CInventoryItem*>(O));
 				break;
 			case GEG_PLAYER_ITEM2RUCK:	 
 				inventory().Ruck(smart_cast<CInventoryItem*>(O)); 

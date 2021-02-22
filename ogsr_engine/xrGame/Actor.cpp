@@ -159,6 +159,7 @@ CActor::CActor() : CEntityAlive(),current_ik_cam_shift(0)
 
 	//разрешить использование пояса в inventory
 	inventory().SetBeltUseful(true);
+	inventory().SetBeltAmmoUseful(true);
 
 	m_pPersonWeLookingAt	= NULL;
 	m_pVehicleWeLookingAt	= NULL;
@@ -697,8 +698,11 @@ void CActor::Die(CObject* who)
 
 		///!!! чистка пояса
 		TIItemContainer &l_blist = inventory().m_belt;
+		TIItemContainer &l_blist2 = inventory().m_beltAmmo;
 		while (!l_blist.empty())	
 			inventory().Ruck(l_blist.front());
+		while (!l_blist2.empty())
+			inventory().Ruck(l_blist2.front());
 	}
 
 	cam_Set					(eacFreeLook);
@@ -922,8 +926,11 @@ void CActor::shedule_Update	(u32 DT)
 		pHudItem->SetHUDmode(HUDview());
 
 	//обновление инвентаря
-	if ( !updated )
-          inventory().RestoreBeltOrder();
+	if (!updated)
+	{
+		inventory().RestoreBeltOrder();
+		inventory().RestoreBeltAmmoOrder();
+	}
 	UpdateInventoryOwner			(DT);
 
 	static u32 tasks_update_time = 0;
@@ -1363,7 +1370,7 @@ void CActor::OnItemDrop			(CInventoryItem *inventory_item)
 {
 	CInventoryOwner::OnItemDrop(inventory_item);
 
-	if ( inventory_item->m_eItemPlace == eItemPlaceBelt )
+	if ( inventory_item->m_eItemPlace == eItemPlaceBeltAmmo )
 		UpdateArtefactPanel();
 }
 
@@ -1395,11 +1402,19 @@ void CActor::OnItemBelt		(CInventoryItem *inventory_item, EItemPlace previous_pl
 	UpdateArtefactPanel();
 }
 
+void CActor::OnItemBeltAmmo		(CInventoryItem* inventory_item, EItemPlace previous_place)
+{
+	CInventoryOwner::OnItemBeltAmmo(inventory_item, previous_place);
+
+	UpdateArtefactPanel();
+}
+
+
 void CActor::OnItemSlot(CInventoryItem* inventory_item, EItemPlace previous_place)
 {
 	CInventoryOwner::OnItemSlot(inventory_item, previous_place);
 
-	if (previous_place == eItemPlaceBelt)
+	if (previous_place == eItemPlaceBeltAmmo)
 		UpdateArtefactPanel();
 }
 
@@ -1407,7 +1422,7 @@ void CActor::OnItemSlot(CInventoryItem* inventory_item, EItemPlace previous_plac
 void CActor::UpdateArtefactPanel()
 {
 	if (Level().CurrentViewEntity() && Level().CurrentViewEntity() == this) //Оно надо вообще без мультиплеера?
-		HUD().GetUI()->UIMainIngameWnd->m_artefactPanel->InitIcons(inventory().m_belt);
+		HUD().GetUI()->UIMainIngameWnd->m_artefactPanel->InitIcons(inventory().m_beltAmmo);
 }
 
 void CActor::ApplyArtefactEffects(ActorRestoreParams& r, CArtefact*	artefact)
@@ -1440,7 +1455,7 @@ void CActor::ApplyArtefactEffects(ActorRestoreParams& r, CArtefact*	artefact)
 	else {
 
 		if (artefact->RadiationRestoreSpeed() > 0 && Core.Features.test(xrCore::Feature::af_radiation_immunity_mod)) {
-			float new_rs = HitArtefactsOnBelt(artefact->RadiationRestoreSpeed(), ALife::eHitTypeRadiation, true);
+			float new_rs = HitArtefactsOnBeltAmmo(artefact->RadiationRestoreSpeed(), ALife::eHitTypeRadiation, true);
 			if (new_rs > artefact->RadiationRestoreSpeed())
 				r.RadiationRestoreSpeed += new_rs * k;
 			else
@@ -1551,6 +1566,106 @@ ActorRestoreParams CActor::ActiveArtefactsOnBelt()
 	return r;
 }
 
+
+ActorRestoreParams CActor::ActiveArtefactsOnBeltAmmo()
+{
+	ActorRestoreParams r;
+
+	Memory.mem_fill(&r, 0, sizeof(r));
+
+	for (TIItemContainer::iterator it = inventory().m_beltAmmo.begin();
+		inventory().m_beltAmmo.end() != it; ++it)
+	{
+		CArtefact* artefact = smart_cast<CArtefact*>(*it);
+		if (artefact)
+		{
+			ApplyArtefactEffects(r, artefact);
+		}
+	}
+
+	if (Core.Features.test(xrCore::Feature::objects_radioactive)) {
+
+		auto& map_all = inventory().m_all;
+		for (TIItemContainer::iterator it = map_all.begin(); map_all.end() != it; ++it) {
+			CInventoryItem* obj = smart_cast<CInventoryItem*>(*it);
+
+			float k = (Core.Features.test(xrCore::Feature::af_zero_condition) && fis_zero(obj->GetCondition())) ? 0.f : 1.f;
+
+			if (Core.Features.test(xrCore::Feature::af_psy_health)) {
+				// только уменьшение пси здоровоья
+				if (obj->PsyHealthRestoreSpeed() < 0) {
+					r.PsyHealthRestoreSpeed += obj->PsyHealthRestoreSpeed() * k;
+				}
+			}
+			// только увеличение радиации
+			if (obj->RadiationRestoreSpeed() > 0) {
+				if (Core.Features.test(xrCore::Feature::af_radiation_immunity_mod)) {
+					float new_rs = HitArtefactsOnBeltAmmo(obj->RadiationRestoreSpeed(), ALife::eHitTypeRadiation, true);
+					if (new_rs > obj->RadiationRestoreSpeed())
+						r.RadiationRestoreSpeed += new_rs * k;
+					else
+						r.RadiationRestoreSpeed += obj->RadiationRestoreSpeed() * k;
+				}
+				else
+					r.RadiationRestoreSpeed += obj->RadiationRestoreSpeed() * k;
+			}
+		}
+
+	}
+
+	if (Core.Features.test(xrCore::Feature::outfit_af)) {
+
+		PIItem helm = inventory().m_slots[HELMET_SLOT].m_pIItem;
+		if (helm)
+		{
+			CArtefact* helmet = smart_cast<CArtefact*>(helm);
+			if (helmet)
+			{
+				ApplyArtefactEffects(r, helmet);
+			}
+		}
+
+		PIItem outfit_item = inventory().m_slots[OUTFIT_SLOT].m_pIItem;
+		if (outfit_item) {
+			CCustomOutfit* outfit = smart_cast<CCustomOutfit*>(outfit_item);
+			if (outfit) {
+				float k = (Core.Features.test(xrCore::Feature::af_zero_condition) && fis_zero(outfit->GetCondition())) ? 0.f : 1.f;
+
+				r.BleedingRestoreSpeed += outfit->m_fBleedingRestoreSpeed * k;
+				r.HealthRestoreSpeed += outfit->m_fHealthRestoreSpeed * k;
+				r.PowerRestoreSpeed += outfit->m_fPowerRestoreSpeed * k;
+
+				if (Core.Features.test(xrCore::Feature::af_satiety))
+					r.SatietyRestoreSpeed += outfit->m_fSatietyRestoreSpeed * k;
+
+				if (Core.Features.test(xrCore::Feature::actor_thirst))
+					r.ThirstRestoreSpeed += outfit->m_fThirstRestoreSpeed * k;
+
+				if (Core.Features.test(xrCore::Feature::af_psy_health)) {
+					if (Core.Features.test(xrCore::Feature::objects_radioactive)) {
+						if (outfit->PsyHealthRestoreSpeed() > 0)
+							r.PsyHealthRestoreSpeed += outfit->PsyHealthRestoreSpeed() * k;
+					}
+					else {
+						r.PsyHealthRestoreSpeed += outfit->PsyHealthRestoreSpeed() * k;
+					}
+				}
+
+				if (Core.Features.test(xrCore::Feature::objects_radioactive)) {
+					if (outfit->RadiationRestoreSpeed() < 0)
+						r.RadiationRestoreSpeed += outfit->RadiationRestoreSpeed() * k;
+				}
+				else {
+					r.RadiationRestoreSpeed += outfit->RadiationRestoreSpeed() * k;
+				}
+			}
+		}
+
+	}
+
+	return r;
+}
+
 #define ARTEFACTS_UPDATE_TIME 0.100f
 
 void CActor::UpdateArtefactsOnBelt()
@@ -1596,6 +1711,50 @@ void CActor::UpdateArtefactsOnBelt()
 	callback( GameObject::eUpdateArtefactsOnBelt )( f_update_time );
 }
 
+void CActor::UpdateArtefactsOnBeltAmmo()
+{
+	static float update_time = 0;
+
+	float f_update_time = 0;
+
+	if (update_time < ARTEFACTS_UPDATE_TIME)
+	{
+		update_time += conditions().fdelta_time();
+		return;
+	}
+	else
+	{
+		f_update_time = update_time;
+		update_time = 0.0f;
+	}
+
+	auto effects = ActiveArtefactsOnBeltAmmo();
+
+	if (!fis_zero(effects.BleedingRestoreSpeed))
+		conditions().ChangeBleeding(effects.BleedingRestoreSpeed * f_update_time);
+
+	if (!fis_zero(effects.HealthRestoreSpeed))
+		conditions().ChangeHealth(effects.HealthRestoreSpeed * f_update_time);
+
+	if (!fis_zero(effects.PowerRestoreSpeed))
+		conditions().ChangePower(effects.PowerRestoreSpeed * f_update_time);
+
+	if (!fis_zero(effects.SatietyRestoreSpeed))
+		conditions().ChangeSatiety(effects.SatietyRestoreSpeed * f_update_time);
+
+	if (!fis_zero(effects.ThirstRestoreSpeed))
+		conditions().ChangeThirst(effects.ThirstRestoreSpeed * f_update_time);
+
+	if (!fis_zero(effects.PsyHealthRestoreSpeed))
+		conditions().ChangePsyHealth(effects.PsyHealthRestoreSpeed * f_update_time);
+
+	if (!fis_zero(effects.RadiationRestoreSpeed))
+		conditions().ChangeRadiation(effects.RadiationRestoreSpeed * f_update_time);
+
+	callback(GameObject::eUpdateArtefactsOnBeltAmmo)(f_update_time);
+}
+
+
 float	CActor::HitArtefactsOnBelt( float hit_power, ALife::EHitType hit_type, bool belt_only ) {
 	float res_hit_power_k		= 1.0f;
 	float _af_count				= 0.0f;
@@ -1627,6 +1786,39 @@ float	CActor::HitArtefactsOnBelt( float hit_power, ALife::EHitType hit_type, boo
 
 	return res_hit_power_k > 0 ? res_hit_power_k * hit_power : 0;
 }
+
+float	CActor::HitArtefactsOnBeltAmmo(float hit_power, ALife::EHitType hit_type, bool beltAmmo_only) {
+	float res_hit_power_k = 1.0f;
+	float _af_count = 0.0f;
+	for (TIItemContainer::iterator it = inventory().m_beltAmmo.begin();
+		inventory().m_beltAmmo.end() != it; ++it)
+	{
+		CArtefact* artefact = smart_cast<CArtefact*>(*it);
+		if (artefact) {
+			if (!Core.Features.test(xrCore::Feature::af_zero_condition) || !fis_zero(artefact->GetCondition())) {
+				res_hit_power_k += artefact->m_ArtefactHitImmunities.AffectHit(1.0f, hit_type);
+				_af_count += 1.0f;
+			}
+		}
+	}
+	// учет иммунитета от шлема
+	PIItem helm = inventory().m_slots[HELMET_SLOT].m_pIItem;
+	if (helm && !beltAmmo_only) {
+		CArtefact* helmet = smart_cast<CArtefact*>(helm);
+		if (helmet)
+		{
+			if (!Core.Features.test(xrCore::Feature::af_zero_condition) || !fis_zero(helmet->GetCondition())) {
+				res_hit_power_k += helmet->m_ArtefactHitImmunities.AffectHit(1.0f, hit_type);
+				_af_count += 1.0f;
+			}
+		}
+	}
+
+	res_hit_power_k -= _af_count;
+
+	return res_hit_power_k > 0 ? res_hit_power_k * hit_power : 0;
+}
+
 
 void	CActor::SetZoomRndSeed		(s32 Seed)
 {

@@ -247,6 +247,12 @@ void CCustomDetector::OnMoveToBelt		()
 	TurnOn					();
 }
 
+void CCustomDetector::OnMoveToBeltAmmo()
+{
+	inherited::OnMoveToBeltAmmo();
+	TurnOn();
+}
+
 void CCustomDetector::TurnOn()
 {
 	m_bWorking				= true;

@@ -96,7 +96,7 @@ float CCartridge::Weight() const
 CWeaponAmmo::CWeaponAmmo(void) 
 {
 	m_weight				= .2f;
-	m_flags.set				(Fbelt, TRUE);
+	m_flags.set				(FbeltAmmo, TRUE);
 }
 
 CWeaponAmmo::~CWeaponAmmo(void)

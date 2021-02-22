@@ -449,6 +449,12 @@ void CInventoryOwner::OnItemBelt	(CInventoryItem *inventory_item, EItemPlace pre
 	VERIFY(object);
 	object->callback(GameObject::eOnItemToBelt)(inventory_item->object().lua_game_object());
 }
+void CInventoryOwner::OnItemBeltAmmo(CInventoryItem* inventory_item, EItemPlace previous_place)
+{
+	CGameObject* object = smart_cast<CGameObject*>(this);
+	VERIFY(object);
+	object->callback(GameObject::eOnItemToBeltAmmo)(inventory_item->object().lua_game_object());
+}
 void CInventoryOwner::OnItemRuck	(CInventoryItem *inventory_item, EItemPlace previous_place)
 {
 	CGameObject	*object = smart_cast<CGameObject*>(this);

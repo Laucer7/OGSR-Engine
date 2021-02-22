@@ -109,7 +109,7 @@ static bool try_advance_ammo		(CWeapon const& weapon)
 	{
 		LPCSTR l_ammoType = weapon.m_ammoTypes[i].c_str();
 
-		for(TIItemContainer::iterator l_it = inventory.m_belt.begin(); inventory.m_belt.end() != l_it; ++l_it) 
+		for(TIItemContainer::iterator l_it = inventory.m_beltAmmo.begin(); inventory.m_beltAmmo.end() != l_it; ++l_it) 
 		{
 			CWeaponAmmo *l_pAmmo = smart_cast<CWeaponAmmo*>(*l_it);
 			

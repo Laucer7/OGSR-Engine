@@ -111,10 +111,14 @@ bool  CAttachableItem::can_be_attached	() const
 
 	if (!item().m_pCurrentInventory->IsBeltUseful())
 		return				(true);
+	if (!item().m_pCurrentInventory->IsBeltAmmoUseful())
+		return				(true);
 
 	if (item().m_eItemPlace != eItemPlaceBelt)
 		return				(false);
-	 
+	if (item().m_eItemPlace != eItemPlaceBeltAmmo)
+		return				(false);
+
 	return					(true);
 }
 void CAttachableItem::afterAttach		()

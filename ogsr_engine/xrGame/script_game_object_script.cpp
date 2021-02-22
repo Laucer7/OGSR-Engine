@@ -115,6 +115,7 @@ void CScriptGameObject::script_register(lua_State *L)
 				value("on_mouse_wheel",				int(GameObject::eOnMouseWheel)),
 				value("on_mouse_move",				int(GameObject::eOnMouseMove)),
 				value("on_belt",					int(GameObject::eOnItemToBelt)),
+				value("on_beltAmmo",				int(GameObject::eOnItemToBeltAmmo)),
 				value("on_ruck",					int(GameObject::eOnItemToRuck)),
 				value("on_slot",					int(GameObject::eOnItemToSlot)),
 				value("on_before_use_item",			int(GameObject::eOnBeforeUseItem)),

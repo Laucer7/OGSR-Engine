@@ -57,6 +57,7 @@ namespace GameObject {
 		eOnMouseWheel,
 		eOnMouseMove,
 		eOnItemToBelt,
+		eOnItemToBeltAmmo,
 		eOnItemToRuck,
 		eOnItemToSlot,
 		eOnBeforeUseItem,
@@ -106,6 +107,7 @@ namespace GameObject {
 		eOnThrowGrenade,
 		eOnGoodwillChange,
 		eUpdateArtefactsOnBelt,
+		eUpdateArtefactsOnBeltAmmo,
 		eLevelChangerAction,
 
 		eAttachVehicle,

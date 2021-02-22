@@ -62,6 +62,7 @@ public:
 	virtual void OnMoveToSlot		();
 	virtual void OnMoveToRuck		();
 	virtual void OnMoveToBelt		();
+	virtual void OnMoveToBeltAmmo   ();
 
 protected:
 	void StopAllSounds				();

@@ -46,6 +46,7 @@ private:
 	u32								m_ef_equipment_type{};
 
 	u32 m_artefact_count{};
+	u32 m_ammo_count{};
 
 public:
 	float							m_additional_weight{};
@@ -65,4 +66,5 @@ public:
 	float m_fThirstRestoreSpeed;
 
 	u32 get_artefact_count() const { return m_artefact_count; }
+	u32 get_ammo_count() const { return m_ammo_count; }
 };

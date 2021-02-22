@@ -267,6 +267,7 @@ class_<CScriptGameObject> script_register_game_object2(class_<CScriptGameObject>
 
 		.def("iterate_inventory",			&CScriptGameObject::IterateInventory)
 		.def( "iterate_belt", &CScriptGameObject::IterateBelt )
+		.def( "iterate_beltAmmo", &CScriptGameObject::IterateBelt )
 		.def( "iterate_ruck", &CScriptGameObject::IterateRuck )
 		.def("mark_item_dropped",			&CScriptGameObject::MarkItemDropped)
 		.def("marked_dropped",				&CScriptGameObject::MarkedDropped)
@@ -302,14 +303,18 @@ class_<CScriptGameObject> script_register_game_object2(class_<CScriptGameObject>
 		// KD
 		// functions for CInventoryOwner class
 		.def("item_on_belt", &CScriptGameObject::ItemOnBelt)
+		.def("item_on_beltAmmo", &CScriptGameObject::ItemOnBeltAmmo)
 		.def("item_in_ruck", &CScriptGameObject::ItemInRuck)
 		.def("is_on_belt", &CScriptGameObject::IsOnBelt)
+		.def("is_on_beltAmmo", &CScriptGameObject::IsOnBeltAmmo)
 		.def("is_in_ruck", &CScriptGameObject::IsInRuck)
 		.def("is_in_slot", &CScriptGameObject::IsInSlot)
 		.def("move_to_ruck", &CScriptGameObject::MoveToRuck)
 		.def("move_to_belt", &CScriptGameObject::MoveToBelt)
+		.def("move_to_beltAmmo", &CScriptGameObject::MoveToBeltAmmo)
 		.def("move_to_slot", &CScriptGameObject::MoveToSlot)
 		.def("belt_count", &CScriptGameObject::BeltSize)
+		.def("beltAmmo_count", &CScriptGameObject::BeltAmmoSize)
 		.def("ruck_count", &CScriptGameObject::RuckSize)
 		.def("invalidate_inventory", &CScriptGameObject::InvalidateInventory)
 
