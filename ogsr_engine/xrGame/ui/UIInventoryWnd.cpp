@@ -558,7 +558,6 @@ void CUIInventoryWnd::UpdateOutfit()
 		return;
 	}
 
-
 	auto& inv = Actor()->inventory();
 	const u32 new_slots_count = inv.BeltSlotsCount();
 	const u32 new_slots_count2 = inv.BeltAmmoSlotsCount();
@@ -572,19 +571,12 @@ void CUIInventoryWnd::UpdateOutfit()
 		modified = true;
 	}
 
+	while (!inv.m_beltAmmo.empty()) {
+		inv.Ruck(inv.m_beltAmmo.back());
+		modified = true;
+	}
+
 	if (modified) {
-		extern void update_inventory_window(); //некрасиво, зато просто
-		update_inventory_window();
-	}
-
-	auto& l_blist2 = inv.m_beltAmmo;
-	bool modified2{};
-	while (l_blist2.size() > new_slots_count2) {
-		inv.Ruck(l_blist2.back());
-		modified2 = true;
-	}
-
-	if (modified2) {
 		extern void update_inventory_window(); //некрасиво, зато просто
 		update_inventory_window();
 	}
