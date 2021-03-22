@@ -89,6 +89,7 @@ CWeapon::CWeapon(LPCSTR name) : m_fLR_MovingFactor(0.f), m_strafe_offset{}
 	m_set_next_ammoType_on_reload = u32(-1);
 
 	m_nearwall_last_hud_fov = psHUD_FOV_def;
+	m_freelook_switch_back = false;
 }
 
 CWeapon::~CWeapon		()
@@ -1552,6 +1553,13 @@ float CWeapon::CurrentZoomFactor()
 
 void CWeapon::OnZoomIn()
 {
+	CActor* pA = smart_cast<CActor*>(H_Parent());
+	if (pA->active_cam() == eacLookAt)
+	{
+		pA->cam_Set(eacFirstEye);
+		m_freelook_switch_back = true;
+	}
+
 	m_bZoomMode = true;
 
 	// если в режиме ПГ - не будем давать включать динамический зум
@@ -1577,6 +1585,14 @@ void CWeapon::OnZoomIn()
 
 void CWeapon::OnZoomOut()
 {
+	if (m_freelook_switch_back)
+	{
+		CActor* pA = smart_cast<CActor*>(H_Parent());
+		if (pA)
+			pA->cam_Set(eacLookAt);
+		m_freelook_switch_back = false;
+	}
+
 	m_fZoomFactor = Core.Features.test(xrCore::Feature::ogse_wpn_zoom_system) ? 1.f : g_fov;
 
 	if ( m_bZoomMode ) {

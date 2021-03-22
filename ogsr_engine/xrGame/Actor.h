@@ -361,9 +361,9 @@ public:
 	IC CCameraBase*			cam_FirstEye		()	{return cameras[eacFirstEye];}
 	IC EActorCameras		active_cam			()	{return cam_active;}			// KD: need to know which cam active outside actor methods
 	CEffectorBobbing* GetEffectorBobbing() { return pCamBobbing; }
+	void					cam_Set				(EActorCameras style);
 
 protected:
-	void					cam_Set					(EActorCameras style);
 	void					cam_Update				(float dt, float fFOV);
 	void					camUpdateLadder		(float dt);
 	void					cam_SetLadder			();
