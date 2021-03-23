@@ -1453,3 +1453,14 @@ PIItem CInventory::GetAmmoMinCurr( const char *name, bool forActor ) const {
 
   return box;
 }
+
+bool CInventory::IsActiveSlotBlocked() {
+	bool slots_unblocked = true;
+	for ( int i = 0; i < SLOTS_TOTAL; ++i )
+	{
+		if ( m_slots[i].CanBeActivated() )
+				slots_unblocked = false;
+	}
+
+	return slots_unblocked;
+}
