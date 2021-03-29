@@ -63,6 +63,7 @@ public:
 	u16			m_boxSize;
 	u16			m_boxCurr;
 	bool		m_tracer;
+	float		m_additional_weight, m_additional_cost;
 
 public:
 	virtual CInventoryItem *can_make_killing	(const CInventory *inventory) const;

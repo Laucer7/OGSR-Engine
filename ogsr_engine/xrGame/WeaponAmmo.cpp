@@ -125,6 +125,8 @@ void CWeaponAmmo::Load(LPCSTR section)
 	m_buckShot				= pSettings->r_s32(section, "buck_shot");
 	m_impair				= pSettings->r_float(section, "impair");
 	fWallmarkSize			= pSettings->r_float(section,"wm_size");
+	m_additional_cost		= pSettings->r_float(section, "additional_cost");
+	m_additional_weight		= pSettings->r_float(section, "additional_weight");
 
 	R_ASSERT				(fWallmarkSize>0);
 
@@ -260,6 +262,7 @@ float CWeaponAmmo::Weight() const
 	{
 		float res = inherited::Weight();
 		res *= (float)m_boxCurr / (float)m_boxSize;
+		res += m_additional_weight;
 		return res;
 	}
 	return 0;	
@@ -269,6 +272,7 @@ u32 CWeaponAmmo::Cost() const
 {
 	float res = (float) m_cost;		
 	res *= (float)m_boxCurr/(float)m_boxSize;
+	res += m_additional_cost;
 	// return (u32)roundf(res); // VC18 only
 	return (u32)ceil(res + 0.5);
 }
