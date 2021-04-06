@@ -125,8 +125,8 @@ void CWeaponAmmo::Load(LPCSTR section)
 	m_buckShot				= pSettings->r_s32(section, "buck_shot");
 	m_impair				= pSettings->r_float(section, "impair");
 	fWallmarkSize			= pSettings->r_float(section,"wm_size");
-	m_additional_cost		= pSettings->r_float(section, "additional_cost");
-	m_additional_weight		= pSettings->r_float(section, "additional_weight");
+	m_additional_cost		= READ_IF_EXISTS(pSettings, r_float, section, "additional_cost", 0.0f);
+	m_additional_weight		= READ_IF_EXISTS(pSettings, r_float, section, "additional_weight", 0.0f);
 
 	R_ASSERT				(fWallmarkSize>0);
 
