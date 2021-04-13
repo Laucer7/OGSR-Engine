@@ -2085,6 +2085,11 @@ float CWeapon::Weight() const
 		res += pSettings->r_float(GetSilencerName(),"inv_weight");
 	res += GetMagazineWeight(m_magazine);
 
+	if ((m_flagsAddOnState & CSE_ALifeItemWeapon::EWeaponAddonState::eWeaponAmmoUnloaded) == 0) {
+		float add_weight = READ_IF_EXISTS(pSettings, r_float, m_DefaultCartridge.m_ammoSect, "additional_weight", 0.0f);
+		res += add_weight;
+	}
+
 	return res;
 }
 
