@@ -154,7 +154,7 @@ public:
 	void				InvalidateState				()							{ m_dwModifyFrame = Device.dwFrame; }
 	void				Items_SetCurrentEntityHud	(bool current_entity);
 	bool				isBeautifulForActiveSlot	(CInventoryItem *pIItem);
-	bool				IsActiveSlotBlocked			();
+	bool				IsActiveSlotBlocked			() const;
 
 	// максимальный вес инвентаря
 	float				m_fMaxWeight;
