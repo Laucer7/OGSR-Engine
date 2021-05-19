@@ -32,8 +32,7 @@ extern int g_bHudAdjustMode;
 
 void CActor::IR_OnKeyboardPress(int cmd)
 {
-	if (g_bHudAdjustMode)
-		return;
+	
 
 	if (m_blocked_actions.find((EGameActions)cmd) != m_blocked_actions.end() ) return; // Real Wolf. 14.10.2014
 
@@ -184,8 +183,6 @@ void CActor::IR_OnMouseWheel(int direction)
 }
 void CActor::IR_OnKeyboardRelease(int cmd)
 {
-	if (g_bHudAdjustMode)
-		return;
 
 	if (m_blocked_actions.find((EGameActions)cmd) != m_blocked_actions.end() ) return; // Real Wolf. 14.10.2014
 
@@ -224,9 +221,7 @@ void CActor::IR_OnKeyboardRelease(int cmd)
 
 void CActor::IR_OnKeyboardHold(int cmd)
 {
-	if (g_bHudAdjustMode)
-		return;
-
+	
 	if (m_blocked_actions.find((EGameActions)cmd) != m_blocked_actions.end() ) return; // Real Wolf. 14.10.2014
 
 	if (Remote() || !g_Alive())					return;
