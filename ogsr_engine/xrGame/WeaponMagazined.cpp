@@ -424,7 +424,7 @@ void CWeaponMagazined::ReloadMagazine()
 	VERIFY((u32)iAmmoElapsed == m_magazine.size());
 
 	//выкинуть коробку патронов, если она пустая
-	if(m_pAmmo && !m_pAmmo->m_boxCurr && OnServer() && ( !ParentIsActor() || (ammo_spawned || weapon_unloaded || smart_cast<CWeaponRPG7*>(this) || smart_cast<CWeaponMagazinedWGrenade*>(this)->m_bGrenadeMode)))
+	if(m_pAmmo && !m_pAmmo->m_boxCurr && OnServer() && ( !ParentIsActor() || (ammo_spawned || weapon_unloaded || smart_cast<CWeaponRPG7*>(this) || (smart_cast<CWeaponMagazinedWGrenade*>(this) && smart_cast<CWeaponMagazinedWGrenade*>(this)->m_bGrenadeMode))))
 		m_pAmmo->DestroyObject(); //SetDropManual(TRUE);
 
 	if (Core.Features.test(xrCore::Feature::hard_ammo_reload) && ParentIsActor() && m_pAmmo ) {
